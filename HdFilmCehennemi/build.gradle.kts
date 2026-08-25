@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.kraptor"
+    namespace = "recloudstream"
     compileSdk = 34
 
     defaultConfig {
