@@ -1,4 +1,4 @@
-package com.kraptor
+package recloudstream
 
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.ExtractorLink
@@ -102,12 +102,5 @@ class HdFilmCehennemi : MainAPI() {
             }
         }
         return true
-    }
-}
-
-@CloudstreamPlugin
-class HdFilmCehennemiPlugin : Plugin() {
-    override fun load(context: Context) {
-        registerMainAPI(HdFilmCehennemi())
     }
 }
