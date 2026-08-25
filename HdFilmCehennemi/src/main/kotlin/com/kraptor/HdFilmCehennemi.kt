@@ -1,7 +1,8 @@
 package com.kraptor
 
 import com.lagradost.cloudstream3.*
-import com.lagradost.cloudstream3.utils.*
+import com.lagradost.cloudstream3.utils.ExtractorLink
+import com.lagradost.cloudstream3.utils.loadExtractor
 import org.jsoup.nodes.Element
 
 class HdFilmCehennemi : MainAPI() {
@@ -19,7 +20,7 @@ class HdFilmCehennemi : MainAPI() {
     )
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
-        val url = if (page == 1) request.data else "${request.data}page/$page/"
+        val url = if (page <= 1) request.data else "${request.data}page/$page/"
         val document = app.get(url).document
         val home = document.select("a.poster, a.mini-poster").mapNotNull { it.toSearchResult() }
         return newHomePageResponse(request.name, home)
@@ -49,9 +50,9 @@ class HdFilmCehennemi : MainAPI() {
         val document = app.get(url).document
 
         val title = document.selectFirst("h1.section-title")?.ownText()?.trim()
-            ?: document.selectFirst("h1")?.text()?.trim() 
+            ?: document.selectFirst("h1")?.text()?.trim()
             ?: ""
-        
+
         val posterImg = document.selectFirst("aside.post-info-poster img")
         val poster = fixUrlNull(
             posterImg?.attr("data-src")?.ifEmpty { null }
@@ -60,7 +61,6 @@ class HdFilmCehennemi : MainAPI() {
 
         val description = document.selectFirst("article.post-info-content p, div.post-info-content p")?.text()?.trim()
         val year = document.selectFirst("div.post-info-year-country a")?.text()?.trim()?.toIntOrNull()
-        val rating = document.selectFirst("div.post-info-imdb-rating span")?.ownText()?.trim()?.toRatingInt()
 
         val isTvSeries = url.contains("/dizi/")
 
@@ -69,20 +69,20 @@ class HdFilmCehennemi : MainAPI() {
             document.select("div.episode-item a, a.episode").forEach { ep ->
                 val epHref = fixUrl(ep.attr("href"))
                 val epTitle = ep.text().trim()
-                episodes.add(Episode(epHref, epTitle))
+                episodes.add(newEpisode(epHref) {
+                    this.name = epTitle
+                })
             }
             newTvSeriesLoadResponse(title, url, TvType.TvSeries, episodes) {
                 this.posterUrl = poster
                 this.plot = description
                 this.year = year
-                this.rating = rating
             }
         } else {
             newMovieLoadResponse(title, url, TvType.Movie, url) {
                 this.posterUrl = poster
                 this.plot = description
                 this.year = year
-                this.rating = rating
             }
         }
     }
