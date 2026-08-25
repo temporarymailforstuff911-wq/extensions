@@ -104,3 +104,10 @@ class HdFilmCehennemi : MainAPI() {
         return true
     }
 }
+
+@CloudstreamPlugin
+class HdFilmCehennemiPlugin : Plugin() {
+    override fun load(context: Context) {
+        registerMainAPI(HdFilmCehennemi())
+    }
+}
